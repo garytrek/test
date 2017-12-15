@@ -1,0 +1,12 @@
+version: '2'
+services:
+  my-nginx:
+    build: ./my-nginx
+    ports:
+     - "80:80"
+
+  my-php-fpm:
+    build: ./my-php-fpm
+    ports:
+     - "9000:9000"
+
