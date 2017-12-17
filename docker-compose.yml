@@ -1,12 +1,43 @@
 version: '2'
 services:
+  mysql_data_myapp:
+    build: ./mysql-data
+    container_name: mysql_data_myapp
+
+  mysql-server:
+    build: ./mysql-server
+    container_name: mysql_server
+    volumes_from:
+      - mysql_data_myapp:rw
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: myappdata
+      MYSQL_USER: myapp
+      MYSQL_PASSWORD: myapp123
+    depends_on:
+      - mysql_data_myapp
+    ports:
+      - "3307:3306"
+
+  wordpress:
+    image: wordpress
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      WORDPRESS_DB_PASSWORD: myapp123
+      WORDPRESS_DB_HOST: mysql-server
+      WORDPRESS_DB_USER: myapp
+      WORDPRESS_DB_NAME: myappdata
+    depends_on:
+      - mysql-server
+
   my-nginx:
     build: ./my-nginx
     ports:
      - "80:80"
-
-#  my-php-fpm:
-#    build: ./my-php-fpm
-#    ports:
-#     - "9000:9000"
-
+    volumes:
+     - ./nginx-logs:/var/log/nginx
+    depends_on:
+     - wordpress
